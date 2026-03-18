@@ -145,6 +145,34 @@ public class TerminalBuffer {
         setCursor(cursorCol, cursorRow);
     }
 
+    public void fillLine(int row, char ch) {
+        validateRow(row);
+        screen.get(row).fill(ch, currentAttributes);
+    }
+
+    public void insertLineAtBottom() {
+        if (maxScrollback > 0) {
+            scrollback.add(screen.get(0).copy());
+            if (scrollback.size() > maxScrollback) {
+                scrollback.remove(0);
+            }
+        }
+
+        screen.remove(0);
+        screen.add(new Line(width));
+    }
+
+    public void clearScreen() {
+        for (int row = 0; row < height; row++) {
+            screen.set(row, new Line(width));
+        }
+    }
+
+    public void clearAll() {
+        clearScreen();
+        scrollback.clear();
+    }
+
     public char getChar(int col, int row) {
         validateRow(row);
         return screen.get(row).get(col).getCh();
@@ -153,6 +181,10 @@ public class TerminalBuffer {
     public CellAttributes getAttributes(int col, int row) {
         validateRow(row);
         return screen.get(row).get(col).getAttributes();
+    }
+
+    public int getScrollbackSize() {
+        return scrollback.size();
     }
 
     private static int clamp(int value, int min, int max) {

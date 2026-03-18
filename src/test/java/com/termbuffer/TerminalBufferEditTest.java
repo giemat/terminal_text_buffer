@@ -7,6 +7,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TerminalBufferEditTest {
 
     @Test
+    void fillLineFillsEntireRowWithCurrentAttributes() {
+        TerminalBuffer buffer = new TerminalBuffer(5, 3, 100);
+        buffer.setForeground(Color.CYAN);
+
+        buffer.fillLine(1, '#');
+
+        for (int col = 0; col < 5; col++) {
+            assertEquals('#', buffer.getChar(col, 1));
+            assertEquals(Color.CYAN, buffer.getAttributes(col, 1).foreground());
+        }
+    }
+
+    @Test
     void writeTextWritesCharactersWithDefaultAttributes() {
         TerminalBuffer buffer = new TerminalBuffer(10, 3, 100);
 
