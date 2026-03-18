@@ -116,6 +116,35 @@ public class TerminalBuffer {
         cursorCol = clamp(cursorCol, 0, width - 1);
     }
 
+    public void insertText(String text) {
+        Objects.requireNonNull(text, "text must not be null");
+
+        for (int i = 0; i < text.length(); i++) {
+            Cell overflow = screen.get(cursorRow).insertAndReturnOverflow(cursorCol, text.charAt(i), currentAttributes);
+            cursorCol++;
+
+            while (cursorCol >= width) {
+                if (cursorRow >= height - 1) {
+                    cursorCol = width - 1;
+                    return;
+                }
+
+                cursorRow++;
+                cursorCol = 0;
+
+                if (overflow.isEmpty()) {
+                    break;
+                }
+
+                overflow = screen.get(cursorRow)
+                        .insertAndReturnOverflow(cursorCol, overflow.getCh(), overflow.getAttributes());
+                cursorCol++;
+            }
+        }
+
+        setCursor(cursorCol, cursorRow);
+    }
+
     public char getChar(int col, int row) {
         validateRow(row);
         return screen.get(row).get(col).getCh();

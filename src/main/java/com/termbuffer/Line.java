@@ -34,14 +34,21 @@ public class Line {
     }
 
     public void insert(int col, char ch, CellAttributes attrs) {
+        insertAndReturnOverflow(col, ch, attrs);
+    }
+
+    public Cell insertAndReturnOverflow(int col, char ch, CellAttributes attrs) {
         validateColumn(col);
         Objects.requireNonNull(attrs, "attrs must not be null");
+
+        Cell overflow = cells[cells.length - 1].copy();
 
         for (int i = cells.length - 1; i > col; i--) {
             cells[i] = cells[i - 1];
         }
 
         cells[col] = new Cell(ch, attrs);
+        return overflow;
     }
 
     public String asString() {
