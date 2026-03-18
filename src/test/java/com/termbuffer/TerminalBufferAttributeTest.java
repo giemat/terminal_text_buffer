@@ -11,6 +11,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TerminalBufferAttributeTest {
 
     @Test
+    void terminalBufferStartsWithDefaultCurrentAttributes() {
+        TerminalBuffer buffer = new TerminalBuffer(10, 5, 100);
+
+        assertEquals(CellAttributes.DEFAULT, buffer.getCurrentAttributes());
+    }
+
+    @Test
+    void terminalBufferAttributeMutatorsUpdateCurrentAttributes() {
+        TerminalBuffer buffer = new TerminalBuffer(10, 5, 100);
+
+        buffer.setForeground(Color.RED);
+        buffer.setBackground(Color.BLUE);
+        buffer.addStyle(Style.BOLD);
+        buffer.addStyle(Style.UNDERLINE);
+        buffer.removeStyle(Style.BOLD);
+
+        CellAttributes current = buffer.getCurrentAttributes();
+        assertEquals(Color.RED, current.foreground());
+        assertEquals(Color.BLUE, current.background());
+        assertEquals(Set.of(Style.UNDERLINE), current.styles());
+    }
+
+    @Test
+    void terminalBufferResetAttributesRestoresDefault() {
+        TerminalBuffer buffer = new TerminalBuffer(10, 5, 100);
+        buffer.setForeground(Color.GREEN);
+        buffer.addStyle(Style.ITALIC);
+
+        buffer.resetAttributes();
+
+        assertEquals(CellAttributes.DEFAULT, buffer.getCurrentAttributes());
+    }
+
+    @Test
     void defaultAttributesUseDefaultColorsAndNoStyles() {
         CellAttributes attributes = CellAttributes.DEFAULT;
 

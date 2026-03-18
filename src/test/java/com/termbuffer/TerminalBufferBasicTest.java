@@ -2,10 +2,24 @@ package com.termbuffer;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TerminalBufferBasicTest {
+
+    @Test
+    void terminalBufferConstructorAcceptsValidDimensions() {
+        assertDoesNotThrow(() -> new TerminalBuffer(80, 24, 1000));
+    }
+
+    @Test
+    void terminalBufferConstructorRejectsInvalidArguments() {
+        assertThrows(IllegalArgumentException.class, () -> new TerminalBuffer(0, 24, 1000));
+        assertThrows(IllegalArgumentException.class, () -> new TerminalBuffer(80, 0, 1000));
+        assertThrows(IllegalArgumentException.class, () -> new TerminalBuffer(80, 24, -1));
+    }
 
     @Test
     void emptyLineAsStringReturnsEmptyString() {
