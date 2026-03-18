@@ -3,8 +3,32 @@ package com.termbuffer;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TerminalBufferScrollbackTest {
+
+    @Test
+    void negativeRowReadsFromScrollback() {
+        TerminalBuffer buffer = new TerminalBuffer(4, 2, 10);
+        buffer.setForeground(Color.MAGENTA);
+        buffer.writeText("AB");
+
+        buffer.insertLineAtBottom();
+
+        assertEquals('A', buffer.getChar(0, -1));
+        assertEquals('B', buffer.getChar(1, -1));
+        assertEquals(Color.MAGENTA, buffer.getAttributes(0, -1).foreground());
+    }
+
+    @Test
+    void invalidRowsThrowIndexOutOfBounds() {
+        TerminalBuffer buffer = new TerminalBuffer(4, 2, 1);
+        buffer.writeText("AB");
+        buffer.insertLineAtBottom();
+
+        assertThrows(IndexOutOfBoundsException.class, () -> buffer.getChar(0, -2));
+        assertThrows(IndexOutOfBoundsException.class, () -> buffer.getChar(0, 2));
+    }
 
     @Test
     void insertLineAtBottomMovesTopLineAndGrowsScrollback() {

@@ -7,6 +7,32 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TerminalBufferEditTest {
 
     @Test
+    void lineAndScreenStringAccessReturnsExpectedText() {
+        TerminalBuffer buffer = new TerminalBuffer(5, 2, 10);
+        buffer.writeText("abc");
+        buffer.setCursor(0, 1);
+        buffer.writeText("xy");
+
+        assertEquals("abc", buffer.getLineAsString(0));
+        assertEquals("xy", buffer.getLineAsString(1));
+        assertEquals("abc\nxy", buffer.getScreenAsString());
+    }
+
+    @Test
+    void allStringIncludesScrollbackThenScreen() {
+        TerminalBuffer buffer = new TerminalBuffer(4, 2, 10);
+        buffer.writeText("top");
+        buffer.setCursor(0, 1);
+        buffer.writeText("mid");
+        buffer.insertLineAtBottom();
+        buffer.setCursor(0, 1);
+        buffer.writeText("bot");
+
+        assertEquals("top\nmid\nbot", buffer.getAllAsString());
+        assertEquals("top", buffer.getLineAsString(-1));
+    }
+
+    @Test
     void fillLineFillsEntireRowWithCurrentAttributes() {
         TerminalBuffer buffer = new TerminalBuffer(5, 3, 100);
         buffer.setForeground(Color.CYAN);

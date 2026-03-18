@@ -15,6 +15,14 @@ class TerminalBufferBasicTest {
     }
 
     @Test
+    void terminalBufferExposesConfiguredDimensions() {
+        TerminalBuffer buffer = new TerminalBuffer(80, 24, 1000);
+
+        assertEquals(80, buffer.getWidth());
+        assertEquals(24, buffer.getHeight());
+    }
+
+    @Test
     void terminalBufferConstructorRejectsInvalidArguments() {
         assertThrows(IllegalArgumentException.class, () -> new TerminalBuffer(0, 24, 1000));
         assertThrows(IllegalArgumentException.class, () -> new TerminalBuffer(80, 0, 1000));

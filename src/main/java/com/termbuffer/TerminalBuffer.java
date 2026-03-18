@@ -146,7 +146,7 @@ public class TerminalBuffer {
     }
 
     public void fillLine(int row, char ch) {
-        validateRow(row);
+        validateScreenRow(row);
         screen.get(row).fill(ch, currentAttributes);
     }
 
@@ -174,13 +174,34 @@ public class TerminalBuffer {
     }
 
     public char getChar(int col, int row) {
-        validateRow(row);
-        return screen.get(row).get(col).getCh();
+        return resolveLine(row).get(col).getCh();
     }
 
     public CellAttributes getAttributes(int col, int row) {
-        validateRow(row);
-        return screen.get(row).get(col).getAttributes();
+        return resolveLine(row).get(col).getAttributes();
+    }
+
+    public String getLineAsString(int row) {
+        return resolveLine(row).asString();
+    }
+
+    public String getScreenAsString() {
+        return joinLines(screen);
+    }
+
+    public String getAllAsString() {
+        if (scrollback.isEmpty()) {
+            return getScreenAsString();
+        }
+        return joinLines(scrollback) + "\n" + joinLines(screen);
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public int getScrollbackSize() {
@@ -191,7 +212,31 @@ public class TerminalBuffer {
         return Math.max(min, Math.min(value, max));
     }
 
-    private void validateRow(int row) {
+    private Line resolveLine(int row) {
+        if (row >= 0) {
+            validateScreenRow(row);
+            return screen.get(row);
+        }
+
+        int scrollbackIndex = scrollback.size() + row;
+        if (scrollbackIndex < 0 || scrollbackIndex >= scrollback.size()) {
+            throw new IndexOutOfBoundsException("Row out of bounds: " + row);
+        }
+        return scrollback.get(scrollbackIndex);
+    }
+
+    private String joinLines(List<Line> lines) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < lines.size(); i++) {
+            if (i > 0) {
+                builder.append('\n');
+            }
+            builder.append(lines.get(i).asString());
+        }
+        return builder.toString();
+    }
+
+    private void validateScreenRow(int row) {
         if (row < 0 || row >= height) {
             throw new IndexOutOfBoundsException("Row out of bounds: " + row);
         }
