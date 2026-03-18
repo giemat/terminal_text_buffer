@@ -11,6 +11,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TerminalBufferAttributeTest {
 
     @Test
+    void freshScreenCellsExposeDefaultAttributes() {
+        TerminalBuffer buffer = new TerminalBuffer(4, 2, 10);
+
+        assertEquals(CellAttributes.DEFAULT, buffer.getAttributes(0, 0));
+        assertEquals(CellAttributes.DEFAULT, buffer.getAttributes(3, 1));
+    }
+
+    @Test
     void terminalBufferStartsWithDefaultCurrentAttributes() {
         TerminalBuffer buffer = new TerminalBuffer(10, 5, 100);
 

@@ -7,6 +7,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TerminalBufferEditTest {
 
     @Test
+    void writeEmptyStringIsNoOp() {
+        TerminalBuffer buffer = new TerminalBuffer(5, 2, 10);
+        buffer.writeText("abc");
+        buffer.setCursor(1, 0);
+
+        buffer.writeText("");
+
+        assertEquals('a', buffer.getChar(0, 0));
+        assertEquals('b', buffer.getChar(1, 0));
+        assertEquals('c', buffer.getChar(2, 0));
+        assertEquals(1, buffer.getCursorCol());
+        assertEquals(0, buffer.getCursorRow());
+    }
+
+    @Test
     void lineAndScreenStringAccessReturnsExpectedText() {
         TerminalBuffer buffer = new TerminalBuffer(5, 2, 10);
         buffer.writeText("abc");
@@ -42,6 +57,18 @@ class TerminalBufferEditTest {
         for (int col = 0; col < 5; col++) {
             assertEquals('#', buffer.getChar(col, 1));
             assertEquals(Color.CYAN, buffer.getAttributes(col, 1).foreground());
+        }
+    }
+
+    @Test
+    void fillLineWithEmptyCharacterClearsTheLine() {
+        TerminalBuffer buffer = new TerminalBuffer(5, 2, 10);
+        buffer.writeText("hello");
+        buffer.fillLine(0, Cell.EMPTY);
+
+        assertEquals("", buffer.getLineAsString(0));
+        for (int col = 0; col < 5; col++) {
+            assertEquals(Cell.EMPTY, buffer.getChar(col, 0));
         }
     }
 

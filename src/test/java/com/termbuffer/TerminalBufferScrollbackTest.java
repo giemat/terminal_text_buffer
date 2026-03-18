@@ -8,6 +8,28 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class TerminalBufferScrollbackTest {
 
     @Test
+    void insertLineAtBottomOnBlankScreenStillRotatesLines() {
+        TerminalBuffer buffer = new TerminalBuffer(3, 2, 5);
+
+        buffer.insertLineAtBottom();
+
+        assertEquals(1, buffer.getScrollbackSize());
+        assertEquals(Cell.EMPTY, buffer.getChar(0, 0));
+        assertEquals(Cell.EMPTY, buffer.getChar(0, 1));
+    }
+
+    @Test
+    void maxScrollbackZeroDiscardsScrolledLines() {
+        TerminalBuffer buffer = new TerminalBuffer(3, 2, 0);
+        buffer.writeText("abc");
+
+        buffer.insertLineAtBottom();
+
+        assertEquals(0, buffer.getScrollbackSize());
+        assertThrows(IndexOutOfBoundsException.class, () -> buffer.getChar(0, -1));
+    }
+
+    @Test
     void negativeRowReadsFromScrollback() {
         TerminalBuffer buffer = new TerminalBuffer(4, 2, 10);
         buffer.setForeground(Color.MAGENTA);

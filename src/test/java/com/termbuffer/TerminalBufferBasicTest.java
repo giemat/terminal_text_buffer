@@ -23,6 +23,17 @@ class TerminalBufferBasicTest {
     }
 
     @Test
+    void terminalBufferSupportsMinimumDimensions() {
+        TerminalBuffer buffer = new TerminalBuffer(1, 1, 0);
+
+        assertEquals(1, buffer.getWidth());
+        assertEquals(1, buffer.getHeight());
+        assertEquals(0, buffer.getScrollbackSize());
+        assertEquals(0, buffer.getCursorCol());
+        assertEquals(0, buffer.getCursorRow());
+    }
+
+    @Test
     void terminalBufferConstructorRejectsInvalidArguments() {
         assertThrows(IllegalArgumentException.class, () -> new TerminalBuffer(0, 24, 1000));
         assertThrows(IllegalArgumentException.class, () -> new TerminalBuffer(80, 0, 1000));
