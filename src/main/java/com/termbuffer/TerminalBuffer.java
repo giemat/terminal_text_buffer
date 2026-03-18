@@ -100,7 +100,39 @@ public class TerminalBuffer {
         moveCursor(n, 0);
     }
 
+    public void writeText(String text) {
+        Objects.requireNonNull(text, "text must not be null");
+        Line line = screen.get(cursorRow);
+
+        for (int i = 0; i < text.length(); i++) {
+            if (cursorCol >= width) {
+                break;
+            }
+
+            line.set(cursorCol, text.charAt(i), currentAttributes);
+            cursorCol++;
+        }
+
+        cursorCol = clamp(cursorCol, 0, width - 1);
+    }
+
+    public char getChar(int col, int row) {
+        validateRow(row);
+        return screen.get(row).get(col).getCh();
+    }
+
+    public CellAttributes getAttributes(int col, int row) {
+        validateRow(row);
+        return screen.get(row).get(col).getAttributes();
+    }
+
     private static int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(value, max));
+    }
+
+    private void validateRow(int row) {
+        if (row < 0 || row >= height) {
+            throw new IndexOutOfBoundsException("Row out of bounds: " + row);
+        }
     }
 }
