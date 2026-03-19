@@ -109,5 +109,21 @@ class TerminalBufferScrollbackTest {
         assertEquals(Cell.EMPTY, buffer.getChar(2, 0));
         assertEquals(Cell.EMPTY, buffer.getChar(0, 1));
     }
+
+    @Test
+    void archivedScrollbackLinesDoNotChangeWhenScreenIsEditedLater() {
+        TerminalBuffer buffer = new TerminalBuffer(4, 2, 5);
+        buffer.setForeground(Color.RED);
+        buffer.writeText("AB");
+        buffer.insertLineAtBottom();
+
+        buffer.resetAttributes();
+        buffer.setCursor(0, 0);
+        buffer.writeText("ZZ");
+
+        assertEquals("AB", buffer.getLineAsString(-1));
+        assertEquals('A', buffer.getChar(0, -1));
+        assertEquals(Color.RED, buffer.getAttributes(0, -1).foreground());
+    }
 }
 

@@ -5,6 +5,5 @@ public enum Style {
     BOLD,
     ITALIC,
     UNDERLINE,
-    BLINK,
     STRIKETHROUGH
 }

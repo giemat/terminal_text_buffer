@@ -14,6 +14,7 @@ public class TerminalBuffer {
 
     private int cursorCol;
     private int cursorRow;
+    private int viewOffset;
 
     private CellAttributes currentAttributes;
 
@@ -40,6 +41,7 @@ public class TerminalBuffer {
 
         this.cursorCol = 0;
         this.cursorRow = 0;
+        this.viewOffset = 0;
         this.currentAttributes = CellAttributes.DEFAULT;
     }
 
@@ -160,6 +162,7 @@ public class TerminalBuffer {
 
         screen.remove(0);
         screen.add(new Line(width));
+        clampViewOffset();
     }
 
     public void clearScreen() {
@@ -171,18 +174,59 @@ public class TerminalBuffer {
     public void clearAll() {
         clearScreen();
         scrollback.clear();
+        viewOffset = 0;
     }
 
+    /**
+     * Reads a character from a row index.
+     * <ul>
+     *     <li>Rows {@code 0..height-1} target the visible screen.</li>
+     *     <li>Negative rows target scrollback where {@code -1} is the newest archived line.</li>
+     * </ul>
+     */
     public char getChar(int col, int row) {
         return resolveLine(row).get(col).getCh();
     }
 
+    /**
+     * Reads cell attributes from a row index.
+     * <ul>
+     *     <li>Rows {@code 0..height-1} target the visible screen.</li>
+     *     <li>Negative rows target scrollback where {@code -1} is the newest archived line.</li>
+     * </ul>
+     */
     public CellAttributes getAttributes(int col, int row) {
         return resolveLine(row).get(col).getAttributes();
     }
 
+    /**
+     * Returns printable text for a row index.
+     * <ul>
+     *     <li>Rows {@code 0..height-1} target the visible screen.</li>
+     *     <li>Negative rows target scrollback where {@code -1} is the newest archived line.</li>
+     * </ul>
+     */
     public String getLineAsString(int row) {
         return resolveLine(row).asString();
+    }
+
+    /**
+     * Sets how many lines up the virtual viewport is shifted into scrollback.
+     * Value is clamped into {@code 0..scrollbackSize}.
+     */
+    public void setViewOffset(int linesUp) {
+        viewOffset = clamp(linesUp, 0, scrollback.size());
+    }
+
+    public int getViewOffset() {
+        return viewOffset;
+    }
+
+    /**
+     * Returns a view-relative line where row {@code 0} is the top row of the current viewport.
+     */
+    public String getVisibleLineAsString(int viewRow) {
+        return resolveLine(resolveViewRow(viewRow)).asString();
     }
 
     public String getScreenAsString() {
@@ -210,6 +254,15 @@ public class TerminalBuffer {
 
     private static int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(value, max));
+    }
+
+    private int resolveViewRow(int viewRow) {
+        validateScreenRow(viewRow);
+        return viewRow - viewOffset;
+    }
+
+    private void clampViewOffset() {
+        viewOffset = clamp(viewOffset, 0, scrollback.size());
     }
 
     private Line resolveLine(int row) {
